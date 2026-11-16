@@ -1,17 +1,8 @@
-module Motor.Reconocedor
-    ( limpiarEspacios
-    , preprocesarLineas
-    , dividirBloques
-    ) where
+module Motor.Reconocedor where
 
-import Data.Char (isSpace)
+import Data.Char (isAlphaNum, isSpace)
 import Motor.Tipos
-    ( Comando (..)
-    , Direccion (..)
-    , ErrorMundo (ErrorSintaxis)
-    , Identificador (..)
-    , Salida (..)
-    )
+
 
 -- Elimina espacios en blanco al inicio y al final de una cadena.
 limpiarEspacios :: String -> String
@@ -44,3 +35,51 @@ dividirBloques ls =
             else bloque : dividirBloques restoSinSep
   where
     esSeparador s = not (null s) && all (== '-') s
+
+cumple :: (Char -> Bool) -> ReadS Char
+cumple condicion (c:cs)
+    | condicion c = [(c, cs)]
+cumple _ _        = []
+
+cadena :: String -> ReadS String
+cadena [] resto = [("", resto)]
+cadena (p:ps) (c:cs)
+    | p == c = [ (p : cola, sobrante) | (cola, sobrante) <- cadena ps cs ]
+cadena _ _ = []
+
+muchos :: ReadS a -> ReadS [a]
+muchos r texto =
+    case r texto of
+        []           -> [([], texto)]
+        [(x, resto)] -> [ (x : xs, sobrante) | (xs, sobrante) <- muchos r resto ]
+
+-- Combinador especializado para tragar espacios en blanco opcionales:
+espacios :: ReadS String
+espacios = muchos (cumple isSpace)
+
+unoOMas :: ReadS a -> ReadS [a]
+unoOMas r texto =
+    [ (x : xs, sobrante)
+    | (x, resto)     <- r texto
+    , (xs, sobrante) <- muchos r resto
+    ]
+
+leerIdentificador :: ReadS Identificador
+leerIdentificador texto =
+    [ (Identificador chars, resto)
+    | (chars, resto) <- unoOMas (cumple esValido) texto
+    ]
+  where
+    esValido c = isAlphaNum c || c == '_'
+
+leerDireccion :: ReadS Direccion
+leerDireccion texto =
+       leer "norte" Norte texto
+    ++ leer "sur" Sur texto
+    ++ leer "este" Este texto
+    ++ leer "oeste" Oeste texto
+    ++ leer "arriba" Arriba texto
+    ++ leer "abajo" Abajo texto
+  where
+    leer palabra direccion entrada =
+        [(direccion, resto) | (_, resto) <- cadena palabra entrada]

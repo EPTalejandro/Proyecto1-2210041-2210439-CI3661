@@ -91,5 +91,5 @@ test-suite aventura-test
                     , containers
                     , directory
                     , filepath
-                    , HUnit -- O hspec / QuickCheck
+                    , HUnit
     default-language: Haskell2010
