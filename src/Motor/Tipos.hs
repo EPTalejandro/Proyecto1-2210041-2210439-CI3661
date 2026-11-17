@@ -1,8 +1,10 @@
 module Motor.Tipos where
+    
 import qualified Data.Map as Map
 
 newtype Identificador = Identificador String
     deriving(Eq,Show)
+
 data Direccion = Norte | Sur | Este | Oeste | Arriba | Abajo
     deriving(Eq,Show)
 
@@ -16,7 +18,7 @@ data Sala = Sala {
     idSala :: Identificador,
     descSala :: String,
     objetosSala :: Map.Map Identificador Objeto,
-    salidasSala :: Map.Map Direccion Identificador, -- sujetador, probablemente lo cambie
+    salidasSala :: Map.Map Direccion Salida, -- sujetador, probablemente lo cambie
     oscuridad :: Bool
 }
 
@@ -79,3 +81,9 @@ data ErrorMundo
     -- Guarda el ID del objeto que falta en el mapa.
     | ObjetoNecesarioNoColocado Identificador
     deriving (Eq, Show)
+
+data Estado = Estado {
+    salaActual :: Identificador,
+    inventarioActual :: [Identificador],
+    metaActual :: Meta
+}
