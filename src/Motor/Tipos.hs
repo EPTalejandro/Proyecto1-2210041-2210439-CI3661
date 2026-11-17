@@ -1,89 +1,121 @@
 module Motor.Tipos where
-    
+
 import qualified Data.Map as Map
 
+-- | Identificador de una sala o de un objeto. Salas y objetos tienen
+-- espacios de nombres separados: un mismo identificador puede existir
+-- como sala y como objeto sin conflicto.
 newtype Identificador = Identificador String
-    deriving(Eq,Show)
+    deriving (Eq, Ord, Show)
 
 data Direccion = Norte | Sur | Este | Oeste | Arriba | Abajo
-    deriving(Eq,Show)
+    deriving (Eq, Ord, Show, Enum, Bounded)
 
-data Objeto = Objeto {
-    idObjeto :: Identificador,
-    descObjeto :: String,
-    ilumina :: Bool
-}
-
-data Sala = Sala {
-    idSala :: Identificador,
-    descSala :: String,
-    objetosSala :: Map.Map Identificador Objeto,
-    salidasSala :: Map.Map Direccion Salida, -- sujetador, probablemente lo cambie
-    oscuridad :: Bool
-}
-
-data Mundo = Mundo {
-    nombre :: String,
-    inicio :: Identificador, -- indetificador de sala
-    salas :: Map.Map Identificador Identificador,
-    objetos :: Map.Map Identificador Objeto,
-    meta :: Meta
-}
-
-type Meta =  Identificador
-
-data Comando = Mirar | Inventario | Ir Direccion | Tomar Identificador | Guardar String | Soltar Identificador |
-                    Cargar String | Ayuda | Salir
-
-data Salida = Salida {
-    destino:: Identificador,
-    requesito :: Maybe Identificador
-}
-
-data ErrorMundo 
-    -- V1: Errores de sintaxis (clave, línea, campos, salidas, direcciones, etc.)
-    -- Requiere el número de línea y un mensaje describiendo el problema de sintaxis.
-    = ErrorSintaxis Int String
-    
-    -- V2: Identificador duplicado en salas u objetos.
-    -- Guarda el identificador que está repetido.
-    | IdentificadorDuplicado Identificador
-    
-    -- V3: Salida hacia una sala inexistente.
-    -- Guarda: ID de la sala de origen, Dirección, ID de la sala destino que no existe.
-    | SalidaASalaInexistente Identificador Direccion Identificador
-    
-    -- V4: Salida bloqueada por un objeto que no existe.
-    -- Guarda: ID de la sala de origen, Dirección, ID del objeto que no existe.
-    | SalidaRequiereObjetoInexistente Identificador Direccion Identificador
-    
-    -- V5: Choque de salidas en la misma sala (ej. dos salidas al Norte).
-    -- Guarda: ID de la sala, y la Dirección que está repetida.
-    | SalidasMismaDireccion Identificador Direccion
-    
-    -- V6: Una sala dice tener un objeto que no está definido en el mundo.
-    -- Guarda: ID de la sala, ID del objeto no definido.
-    | SalaConObjetoNoDefinido Identificador Identificador
-    
-    -- V7: Un objeto está clonado en múltiples lugares.
-    -- Guarda: ID del objeto que se encontró en múltiples salas.
-    | ObjetoMultiplesSalas Identificador
-    
-    -- V8: INICIO o META referencian algo que no existe.
-    -- Un simple String como parámetro para aclarar si falló "Inicio" o "Meta", y el ID que falló.
-    | ReferenciaGlobalInexistente String Identificador
-    
-    -- V9: Una sala es inalcanzable (grafo desconectado).
-    -- Guarda el ID de la sala a la que es imposible llegar.
-    | SalaInalcanzable Identificador
-    
-    -- V10: Un objeto es necesario (meta/salida) pero no fue instanciado en ninguna sala.
-    -- Guarda el ID del objeto que falta en el mapa.
-    | ObjetoNecesarioNoColocado Identificador
+data Objeto = Objeto
+    { idObjeto   :: Identificador
+    , descObjeto :: String
+    , ilumina    :: Bool  -- ^ Variante 0 (Oscuridad): ¿el objeto da luz?
+    }
     deriving (Eq, Show)
 
-data Estado = Estado {
-    salaActual :: Identificador,
-    inventarioActual :: [Identificador],
-    metaActual :: Meta
-}
+-- | Una salida de una sala. El requisito es el objeto que hay que llevar
+-- en el inventario para poder cruzar la salida.
+data Salida = Salida
+    { destino   :: Identificador
+    , requisito :: Maybe Identificador
+    }
+    deriving (Eq, Show)
+
+data Sala = Sala
+    { idSala      :: Identificador
+    , descSala    :: String
+    , objetosSala :: [Identificador]
+        -- ^ Solo guardamos identificadores: la definición de cada objeto
+        -- vive una única vez en 'objetos' del 'Mundo'. Así no hay copias
+        -- que puedan contradecirse y V6/V7 se comprueban sobre referencias.
+    , salidasSala :: Map.Map Direccion Salida
+    , oscura      :: Bool  -- ^ Variante 0 (Oscuridad).
+    }
+    deriving (Eq, Show)
+
+data Meta
+    = LlegarA Identificador
+    | LlevarA Identificador Identificador
+        -- ^ 'LlevarA objeto sala': estar en la sala con el objeto en el
+        -- inventario.
+    deriving (Eq, Show)
+
+data Mundo = Mundo
+    { nombre  :: String
+    , inicio  :: Identificador
+    , salas   :: Map.Map Identificador Sala
+    , objetos :: Map.Map Identificador Objeto
+    , meta    :: Meta
+    }
+    deriving (Eq, Show)
+
+data Comando
+    = Mirar
+    | Inventario
+    | Ir Direccion
+    | Tomar Identificador
+    | Soltar Identificador
+    | Examinar Identificador
+    | Guardar FilePath
+    | Cargar FilePath
+    | Ayuda
+    | Salir
+    deriving (Eq, Show)
+
+-- | Estado dinámico de la partida. 'ejecutar' tiene la firma
+-- @Comando -> Estado -> ([String], Estado)@, así que el mundo (del que
+-- dependen las descripciones, las salidas y los objetos) tiene que estar
+-- dentro del estado. Los objetos que el jugador suelta se quitan de
+-- 'inventarioActual' y se añaden a la sala correspondiente de 'mundoActual'.
+data Estado = Estado
+    { mundoActual      :: Mundo
+    , salaActual       :: Identificador
+    , inventarioActual :: [Identificador]
+    }
+    deriving (Eq, Show)
+
+-- | Ayuda a distinguir los dos espacios de nombres al reportar un
+-- identificador duplicado.
+data Entidad = EntidadSala | EntidadObjeto
+    deriving (Eq, Show)
+
+-- | De dónde sale una referencia global que no existe (V8).
+data Referencia = ReferenciaInicio | ReferenciaMeta
+    deriving (Eq, Show)
+
+data ErrorMundo
+    -- V1: errores de sintaxis, con el número de línea.
+    = ErrorSintaxis Int String
+
+    -- V2: dos salas o dos objetos con el mismo identificador.
+    | IdentificadorDuplicado Entidad Identificador
+
+    -- V3: salida hacia una sala inexistente.
+    | SalidaASalaInexistente Identificador Direccion Identificador
+
+    -- V4: salida que requiere un objeto inexistente.
+    | SalidaRequiereObjetoInexistente Identificador Direccion Identificador
+
+    -- V5: dos salidas en la misma dirección dentro de una sala.
+    | SalidasMismaDireccion Identificador Direccion
+
+    -- V6: sala que contiene un objeto no definido.
+    | SalaConObjetoNoDefinido Identificador Identificador
+
+    -- V7: objeto colocado en más de una sala (o dos veces en la misma).
+    | ObjetoMultiplesSalas Identificador
+
+    -- V8: INICIO o META apuntan a una sala u objeto inexistente.
+    | ReferenciaGlobalInexistente Referencia Identificador
+
+    -- V9: sala inalcanzable desde INICIO.
+    | SalaInalcanzable Identificador
+
+    -- V10: objeto necesario (meta o requisito) que no está en ninguna sala.
+    | ObjetoNecesarioNoColocado Identificador
+    deriving (Eq, Show)
