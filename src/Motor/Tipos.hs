@@ -1,3 +1,4 @@
+module Motor.Tipos where
 import qualified Data.Map as Map
 
 newtype Identificador = Identificador String
