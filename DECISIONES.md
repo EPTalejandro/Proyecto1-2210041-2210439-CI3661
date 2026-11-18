@@ -17,7 +17,6 @@ El motor del juego necesita almacenar las colecciones de salas y objetos extraí
 Elegimos la opción 3. Utilizamos diccionarios (Map.Map Identificador Sala) para almacenar las salas y los objetos. Optamos por esta estructura porque optimiza la velocidad de búsqueda y evita el diseño de funciones recursivas manuales para recorrer listas. Además, la función Map.lookup devuelve nativamente un tipo Maybe, lo cual nos proporciona un mecanismo seguro y natural para manejar los casos donde el usuario intenta interactuar con una sala o un objeto inexistente (cubriendo los errores de validación de referencias). Para los identificadores, descartamos el alias y creamos un tipo propio con newtype para dotar al dominio de mayor rigurosidad.
 
 **Consecuencias**:\
-
 Lo que ganamos (Invariante garantizado): El tipo newtype garantiza a nivel de compilador que es estructuralmente imposible pasar un texto libre (como un comando o una descripción) a una función que espera un identificador, previniendo errores lógicos durante la ejecución.
 
 Lo que perdimos: Al usar newtype, perdimos la comodidad de tratar el texto directamente; ahora es necesario envolver y desenvolver manualmente los identificadores (usando pattern matching o funciones de extracción) al leer el archivo en nuestro módulo [Motor.Mundo] y al interactuar con el diccionario.
