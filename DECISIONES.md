@@ -32,10 +32,11 @@ Contexto:
 El PDF fija diez comandos mínimos y deja libres las variantes: artículos ("tomar la memoria"), abreviaturas ("n" por norte), mayúsculas y sinónimos adicionales. Había que decidir qué formas aceptar para que el reconocedor no fuera ambiguo, para que el jugador no tuviera que adivinar y para que las pruebas automáticas encontraran exactamente lo que esperan. El reconocedor de comandos vive en Motor.Comandos y es puro; el del mundo vive en Motor.Reconocedor y comparte con el primero la noción de identificador, pero no sus reglas de caja.
 
 Opciones:
+    
     Aceptar solo la forma literal del PDF y rechazar toda variante, incluidas mayúsculas.
 
     Aceptar variantes "humanas": artículos, abreviaturas, plurales y sinónimos inventados por nosotros.
-    
+
     Aceptar los comandos de la tabla sin artículos ni abreviaturas, con verbos, direcciones e identificadores insensibles a mayúsculas, y conservar los dos sinónimos que el PDF lista como obligatorios: "coger" e "inv".
 
 Decisión:
