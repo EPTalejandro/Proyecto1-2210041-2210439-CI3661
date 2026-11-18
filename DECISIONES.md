@@ -1,4 +1,6 @@
-D1. Representación del mundo y los identificadores (Redactado por: Alejandro Villamizar)
+## D1. Representación del mundo y los identificadores 
+
+Redactado por: Alejandro Villamizar
 
 Contexto:
 El motor del juego necesita almacenar las colecciones de salas y objetos extraídas del archivo de texto, y acceder a ellas constantemente durante la partida (por ejemplo, al ejecutar un comando de movimiento o examinar un objeto). El problema a resolver era cómo estructurar estas colecciones en el tipo Mundo para que las búsquedas fueran eficientes, y cómo modelar los identificadores para evitar mezclar accidentalmente descripciones de texto con referencias lógicas del juego.
