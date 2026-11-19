@@ -79,6 +79,14 @@ data Estado = Estado
     }
     deriving (Eq, Show)
 
+-- | Motivos por los que una partida no puede comenzar. La variante 0
+-- (Oscuridad) añade 'SalaInicialOscura': el jugador empieza sin objetos y,
+-- por lo tanto, sin ninguna fuente de luz.
+data ErrorInicio
+    = SalaInicialInexistente Identificador
+    | SalaInicialOscura Identificador
+    deriving (Eq, Show)
+
 -- | Ayuda a distinguir los dos espacios de nombres al reportar un
 -- identificador duplicado.
 data Entidad = EntidadSala | EntidadObjeto

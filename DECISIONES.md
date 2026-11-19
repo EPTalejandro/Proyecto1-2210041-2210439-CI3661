@@ -68,3 +68,32 @@ Elegimos la opción 3. En `Motor.Mundo`, definimos estructuras intermedias indep
 Lo que ganamos: Separación limpia de responsabilidades (fase sintáctica vs. fase semántica). Garantizamos que no se pierdan datos por colisión de claves antes de tiempo, permitiendo reportar exhaustivamente todos los errores V2 a V10 sin omitir duplicados. El código de validación queda expresado como funciones puras sobre colecciones bien tipadas en lugar de sobre cadenas de texto crudo.
 Lo que perdimos: Introducimos tipos de datos adicionales que existen únicamente dentro del módulo `Motor.Mundo` y requieren una función explícita de conversión (`ensamblarMundo`) para transformarlos en las estructuras de `Motor.Tipos`.
 Qué haríamos distinto: Si la especificación no exigiera reportar errores sintácticos con número de línea y separar V1 de V2–V10 de forma tan estricta, habríamos usado un único tipo de datos con un funtor aplicativo de validación (`Validation`), pero para las restricciones y tipos cerrados del proyecto, el AST intermedio en dos etapas es la solución más robusta y legible.
+
+## D4. Regla de entrada y comportamiento de las salas oscuras (variante 0)
+
+Redactado por: Alejandro Villamizar
+
+**Contexto**:\
+La variante 0 agrega las claves `OSCURA: si` en las salas y `LUZ: si` en los objetos. El PDF deja abierto qué pasa cuando el jugador intenta entrar a una sala oscura y qué se puede hacer dentro de ella. Había que elegir una regla fácil de explicar, que no dejara al jugador atrapado y que se pudiera probar sin IO. El parser ya reconoce ambas claves y las guarda en `Sala.oscura` y `Objeto.ilumina`; la decisión pendiente era qué hacer con esa información en `Motor.Nucleo`. Además, como el jugador empieza sin objetos, una partida que comenzara en una sala oscura lo dejaría sin luz desde el primer turno.
+
+**Opciones**:
+
+    1. Permitir entrar siempre a la sala oscura, pero ocultar objetos y salidas y bloquear `tomar`/`examinar` mientras no haya luz (la mecánica clásica de exploración a ciegas).
+
+    2. No permitir la entrada sin luz: mostrar un mensaje y dejar al jugador en la sala anterior; con un objeto que ilumine, entrar y comportarse normal. Añadir que la partida no pueda comenzar en una sala oscura.
+
+    3. Permitir entrar y mostrar la descripción de la sala, pero ocultar objetos y salidas y bloquear las interacciones. La luz solo haría falta para interactuar, no para entrar.
+
+**Decisión**:\
+Elegimos la opción 2. En `Motor.Nucleo.ir`, después de comprobar que la salida existe y que el jugador lleva el objeto requerido, se consulta la sala de destino: si `oscura` es `True` y `llevaLuz e` es `False`, se devuelve únicamente el mensaje
+
+    La habitación está oscura, será mejor buscar algo que dé luz.
+
+y el estado no cambia; el jugador se queda donde estaba. Si `llevaLuz e` es `True`, el movimiento se realiza con normalidad y se describe la sala. Un objeto da luz si está en el inventario y su definición en `Mundo.objetos` tiene `ilumina = True`. La comprobación está centralizada en `llevaLuz`, que recorre `inventarioActual` y busca cada objeto con `objetoDe`; no se mira si el objeto está en la sala, porque la variante dice que la luz debe llevarla el jugador.
+
+La regla se aplica solo al entrar. Si una partida cargada deja al jugador dentro de una sala oscura sin luz, `visible` devuelve `False`, `mirar` muestra el mensaje de oscuridad y no lista objetos ni salidas, y `tomar`/`examinar` de objetos de la sala fallan; sin embargo, `ir` sí lo deja salir, porque la comprobación de oscuridad se hace sobre la sala de destino y no sobre la actual. Así se evita un bloqueo permanente. `inventario`, `soltar`, `ayuda` y `examinar` de objetos que ya lleva el jugador siguen funcionando: la oscuridad oculta lo que hay en la sala, no lo que el jugador conoce de su inventario. `OSCURA` y `LUZ` solo aceptan `si`/`sí`/`no`; cualquier otro valor se reporta como error de sintaxis V1.
+
+Para el comienzo, `estadoInicial` no devuelve un `Estado` directo sino `Either ErrorInicio Estado`. Si la sala `INICIO` no existe devuelve `SalaInicialInexistente`; si existe pero tiene `OSCURA: si` devuelve `SalaInicialOscura`, porque el inventario inicial está vacío y el jugador no tendría ninguna fuente de luz. `Main` traduce ese error a un mensaje y termina con código 1, en lugar de empezar una partida en la que el jugador no puede ver ni tomar nada. La comprobación se hace al crear la partida, no al cargar una partida guardada: una partida cargada dentro de una sala oscura es válida porque el jugador puede salir de ella.
+
+**Consecuencias**:\
+Ganamos una regla explícita y fácil de explicar: una sala oscura funciona como una puerta que necesita luz para abrirse, y el jugador recibe un mensaje claro en lugar de quedar dando vueltas sin información. También ganamos que la variante se pueda probar de forma pura: basta con construir un estado, ejecutar `Ir` y comprobar que `salaActual` no cambió, repetir con un objeto `LUZ` en el inventario, y comprobar que `estadoInicial` rechaza un mundo cuyo `INICIO` es oscuro. Perdemos la posibilidad de explorar a ciegas: la sala oscura deja de ser un espacio que se recorre sin ver y pasa a ser un destino bloqueado. Para que la variante importe en el mundo propio, la linterna debe estar disponible antes de la sala oscura y el objeto necesario para ganar debe estar dentro de ella. Queda una consecuencia aceptada: si el jugador suelta la única linterna dentro de una sala oscura, podrá salir pero no volver a recogerla; si se quiere evitar, más adelante se puede impedir soltar el último objeto que ilumina o permitir recogerlo a ciegas. Si el enunciado hubiera pedido exploración a ciegas, habríamos elegido la opción 1, pero habría hecho la variante más difícil de explicar y de probar.
