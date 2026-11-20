@@ -29,7 +29,8 @@ import Motor.Tipos
 -- direcciones y los identificadores se aceptan sin distinguir mayúsculas
 -- de minúsculas; los identificadores se normalizan a minúsculas, que es la
 -- forma canónica del archivo del mundo. No se aceptan artículos ni
--- abreviaturas: el objeto se nombra por su identificador exacto.
+-- abreviaturas: el objeto se nombra por su identificador exacto. Una
+-- dirección sola, como @norte@, es un atajo de @ir norte@.
 leerComando :: String -> Maybe Comando
 leerComando = reconocerCompleto pComando . limpiarEspacios
 
@@ -59,6 +60,8 @@ pComando =
         , comandoConId (cadenaInsensible "examinar") Examinar
         , comandoConRuta (cadenaInsensible "guardar") Guardar
         , comandoConRuta (cadenaInsensible "cargar") Cargar
+        -- Atajo: una dirección sola equivale a "ir <dirección>".
+        , Ir <$> direccionInsensible
         ]
 
 -- | Comandos de una sola palabra, sin argumentos.

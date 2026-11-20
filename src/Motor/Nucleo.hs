@@ -234,7 +234,7 @@ textoAyuda :: [String]
 textoAyuda =
     [ "Comandos disponibles:"
     , "  mirar"
-    , "  ir <dirección>"
+    , "  ir <dirección>    (también puedes escribir solo la dirección)"
     , "  tomar <objeto>    (sinónimo: coger)"
     , "  soltar <objeto>"
     , "  examinar <objeto>"
