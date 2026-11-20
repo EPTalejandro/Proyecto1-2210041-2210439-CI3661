@@ -6,14 +6,14 @@ INICIO: banos
 META: llevar memoria_usb a oficina_de_flaviani
 ---
 OBJETO: llaves_cuartico
-DESC: Un manojo de llaves con una etiqueta que dice «Cuartico». Todavía huele a copia recién hecha.
+DESC: Un manojo de llaves, tiene el lanyer viejo, que bonito que es. Ojala imprimieran mas.
 ---
 OBJETO: linterna
 DESC: Una linterna de vigilancia. La pila está a medias, pero alcanza para cruzar un pasillo a oscuras.
 LUZ: si
 ---
 OBJETO: llaves_ldc
-DESC: Las llaves del LDC, con un llavero del profe Samuel. Por eso estaban en su oficina.
+DESC: Las llaves del LDC, con un llavero de Tung Tung zahur. Por eso estaban en su oficina.
 ---
 OBJETO: control_aire
 DESC: El control del aire acondicionado de la Sala Ken. Alguien lo escondió aquí para que la Ken dejara de quejarse del frío.
@@ -52,7 +52,7 @@ SALIDA: este -> ldc requiere llaves_ldc
 OBJETO: llaves_ldc
 ---
 SALA: ldc
-DESC: El Laboratorio de Computación. Una fila de computadoras con el ventilador a todo volumen y una pizarra llena de fórmulas a medio borrar. Sobre la mesa del fondo están el control del aire de la Ken y una memoria USB con Debian.
+DESC: El Laboratorio de Computación.Parece que estan en medio de una nueva admision, estan ocupados con el nuevo Operador. Sobre la mesa del fondo están el control del aire de la Ken y una memoria USB con Debian.
 SALIDA: oeste -> oficina_de_samuel
 OBJETO: control_aire
 OBJETO: memoria_usb
