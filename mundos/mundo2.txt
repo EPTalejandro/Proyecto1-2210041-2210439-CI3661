@@ -1,0 +1,74 @@
+# Mundo propio: Instalación de última hora (variante 0, Oscuridad).
+# Las líneas que empiezan con # son comentarios y las vacías se ignoran.
+
+MUNDO: Instalación de última hora
+INICIO: banos
+META: llevar memoria_usb a oficina_de_flaviani
+---
+OBJETO: llaves_cuartico
+DESC: Un manojo de llaves, tiene el lanyer viejo, que bonito que es. Ojala imprimieran mas.
+---
+OBJETO: linterna
+DESC: Una linterna de vigilancia. La pila está a medias, pero alcanza para cruzar un pasillo a oscuras.
+LUZ: si
+---
+OBJETO: llaves_ldc
+DESC: Las llaves del LDC, con un llavero de Tung Tung zahur. Por eso estaban en su oficina.
+---
+OBJETO: control_aire
+DESC: El control del aire acondicionado de la Sala Ken. Alguien lo escondió aquí para que la Ken dejara de quejarse del frío.
+---
+OBJETO: memoria_usb
+DESC: Una memoria USB con una imagen de Debian y el instalador de Flaviani. Si esto no compila, no es culpa del hardware.
+---
+OBJETO: pensum
+DESC: El pensum de Computación. Cuatro páginas y una advertencia: «no dejes para última hora lo que puedas hacer en una sola noche».
+---
+OBJETO: carta_despido
+DESC: Una carta de despido: kendy briceño y osmer montilla van a ser despedidos. Alguien la dejó sobre la mesa como si fuera un recordatorio.
+---
+SALA: banos
+DESC: El baño del ala oeste. El espejo tiene un mensaje escrito con marcador: «si sobrevives a esto, borra la pizarra». Huele a limpiador y a café viejo.
+SALIDA: norte -> departamento
+SALIDA: este -> oficina_de_samuel
+---
+SALA: departamento
+DESC: El Departamento de Computación. Hay pilas de exámenes sin corregir, una taza con «Dr.» y una silla que gira sola. Sobre la mesa esperan el pensum y una carta de despido.
+SALIDA: sur -> banos
+SALIDA: este -> sala_ken
+SALIDA: norte -> oficina_de_flaviani
+OBJETO: pensum
+OBJETO: carta_despido
+---
+SALA: sala_ken
+DESC: La Sala Ken. Hace un calor imposible: el control del aire desapareció y la ventana no abre. En la pizarra alguien escribió «NO TOCAR EL AIRE DE LA KEN» tres veces.
+SALIDA: oeste -> departamento
+---
+SALA: oficina_de_samuel
+DESC: La oficina del profesor Samuel. Las persianas están cerradas y la lámpara no enciende; apenas se distinguen montañas de papeles y un llavero colgado de un clavo.
+OSCURA: si
+SALIDA: oeste -> banos
+SALIDA: este -> ldc requiere llaves_ldc
+OBJETO: llaves_ldc
+---
+SALA: ldc
+DESC: El Laboratorio de Computación.Parece que estan en medio de una nueva admision, estan ocupados con el nuevo Operador. Sobre la mesa del fondo están el control del aire de la Ken y una memoria USB con Debian.
+SALIDA: oeste -> oficina_de_samuel
+OBJETO: control_aire
+OBJETO: memoria_usb
+---
+SALA: oficina_de_flaviani
+DESC: La oficina de Flaviani. El profesor no está, parece que se fue. Dejó Calclogic abierto; ojalá el profe Leonardo pueda ayudarlo a mejorarlo.
+SALIDA: sur -> departamento
+SALIDA: oeste -> salita
+---
+SALA: salita
+DESC: La salita de computación. Se escucha a la gente jugar futbolito y a los nuevos demostrar teoremas. En un gancho junto a la puerta hay un manojo de llaves.
+SALIDA: este -> oficina_de_flaviani
+SALIDA: oeste -> cuartico requiere llaves_cuartico
+OBJETO: llaves_cuartico
+---
+SALA: cuartico
+DESC: El cuarto privado de la salita. Por fin está arreglado; solo falta que se lleven las neveras. Sobre una mesa quedó una linterna de vigilancia.
+SALIDA: este -> salita
+OBJETO: linterna

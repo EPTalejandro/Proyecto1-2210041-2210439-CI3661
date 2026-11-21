@@ -1,24 +1,18 @@
 mirar
-norte
-examinar pensum
-examinar carta_despido
-norte
 oeste
-tomar llaves_cuartico
-oeste
-tomar linterna
+tomar carnet
 inventario
-este
-este
-sur
-sur
-este
-tomar llaves_ldc
-este
+norte
+oeste
 tomar memoria_usb
-tomar control_aire
-inventario
-oeste
-oeste
+este
 norte
+arriba
+este
+tomar llave_del_ascensor
+oeste
+oeste
+tomar proyecto_impreso
+este
+arriba
 norte

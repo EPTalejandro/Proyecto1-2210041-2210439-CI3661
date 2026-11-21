@@ -1,0 +1,24 @@
+mirar
+norte
+examinar pensum
+examinar carta_despido
+norte
+oeste
+tomar llaves_cuartico
+oeste
+tomar linterna
+inventario
+este
+este
+sur
+sur
+este
+tomar llaves_ldc
+este
+tomar memoria_usb
+tomar control_aire
+inventario
+oeste
+oeste
+norte
+norte
