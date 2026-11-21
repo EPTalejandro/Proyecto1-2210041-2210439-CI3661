@@ -1,5 +1,3 @@
-r
-
 # Mundo de ejemplo del Proyecto 1 (CI-3661, Sep–Dic 2026).
 # Las líneas que empiezan con # son comentarios. Las líneas vacías se ignoran.
 

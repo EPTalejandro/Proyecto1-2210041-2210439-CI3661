@@ -461,6 +461,13 @@ testsEntrega =
             case leerMundo texto of
                 Left errs -> assertFailure ("errores: " ++ show errs)
                 Right _ -> pure ()
+        , "mundo propio: el mundo es valido" ~: TestCase $ do
+            texto <- readFile "mundos/mundo.txt"
+            case leerMundo texto of
+                Left errs -> assertFailure ("errores: " ++ show errs)
+                Right m -> do
+                    assertBool "al menos 8 salas" (Map.size (salas m) >= 8)
+                    assertBool "al menos 6 objetos" (Map.size (objetos m) >= 6)
         , "entrega: el guion gana" ~: TestCase $ do
             textoMundo <- readFile "mundos/entrega.txt"
             textoGuion <- readFile "guiones/entrega.txt"
@@ -478,6 +485,48 @@ testsEntrega =
                                 (length comandos)
                             let eFinal = estadoTras comandos e0
                             assertBool "ha ganado" (haGanado eFinal)
+        , "mundo propio: el guion gana" ~: TestCase $ do
+            textoMundo <- readFile "mundos/mundo.txt"
+            textoGuion <- readFile "guiones/mundo.txt"
+            case leerMundo textoMundo of
+                Left errs -> assertFailure ("mundo invalido: " ++ show errs)
+                Right m ->
+                    case estadoInicial m of
+                        Left err -> assertFailure ("inicio invalido: " ++ show err)
+                        Right e0 -> do
+                            let lineas = filter (not . null) (lines textoGuion)
+                                comandos = mapMaybe leerComando lineas
+                            assertEqual
+                                "todas las lineas son comandos"
+                                (length lineas)
+                                (length comandos)
+                            let eFinal = estadoTras comandos e0
+                            assertBool "ha ganado" (haGanado eFinal)
+        , "invalidos propios: primer mundo reporta 3 errores" ~: TestCase $ do
+            texto <- readFile "mundos/invalido_primero.txt"
+            case leerMundo texto of
+                Right _ -> assertFailure "se esperaban errores"
+                Left errs -> assertEqual "cantidad" 3 (length errs)
+        , "invalidos propios: segundo mundo reporta 4 errores" ~: TestCase $ do
+            texto <- readFile "mundos/invalido_segundo.txt"
+            case leerMundo texto of
+                Right _ -> assertFailure "se esperaban errores"
+                Left errs -> assertEqual "cantidad" 4 (length errs)
+        , "invalidos propios: tercer mundo reporta 3 errores" ~: TestCase $ do
+            texto <- readFile "mundos/invalido_tercero.txt"
+            case leerMundo texto of
+                Right _ -> assertFailure "se esperaban errores"
+                Left errs -> assertEqual "cantidad" 3 (length errs)
+        , "invalidos propios: cuarto mundo reporta 2 errores" ~: TestCase $ do
+            texto <- readFile "mundos/invalido_cuarto.txt"
+            case leerMundo texto of
+                Right _ -> assertFailure "se esperaban errores"
+                Left errs -> do
+                    assertEqual "cantidad" 2 (length errs)
+                    assertEqual
+                        "todos son sintacticos"
+                        2
+                        (length [n | ErrorSintaxis n _ <- errs])
         ]
 
 -- ---------------------------------------------------------------------------
