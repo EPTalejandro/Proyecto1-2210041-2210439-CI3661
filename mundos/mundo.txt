@@ -1,0 +1,67 @@
+MUNDO: La Mansión de los Susurros
+INICIO: cocina
+META: llevar diario_maldito a exterior
+---
+OBJETO: vela_antigua
+DESC: Un candelabro de plata oxidada con una vela de cera negra que arde con una llama pálida y fría.
+LUZ: si
+---
+OBJETO: llave_sotano
+DESC: Una llave de hierro forjado cubierta de telarañas y óxido. Tiene grabada una calavera en el mango.
+---
+OBJETO: llave_maestra
+DESC: Una llave pesada de bronce con múltiples dientes, capaz de abrir el portón principal de la mansión.
+---
+OBJETO: crucifijo
+DESC: Una cruz de madera desgastada. Al sostenerla, sientes un leve calor que ahuyenta las sombras.
+---
+OBJETO: nota_sangrienta
+DESC: Un trozo de papel amarillento con letras apresuradas: «No bajes a las tinieblas sin fuego, o jamás encontrarás la salida».
+---
+OBJETO: diario_maldito
+DESC: Un libro encuadernado en cuero oscuro. Sus páginas susurran nombres olvidados y contienen la maldición de la casa.
+---
+SALA: cocina
+DESC: Una cocina abandonada con ollas oxidadas y platos rotos en el suelo. El aire huele a humedad y ceniza. Sobre la mesa hay una nota ensangrentada y al fondo hay una puerta hacia el garaje.
+SALIDA: norte -> pasillo
+SALIDA: este -> garaje
+OBJETO: nota_sangrienta
+---
+SALA: pasillo
+DESC: Un corredor largo y estrecho con retratos cuyos ojos parecen seguirte. Las tablas del suelo crujen con cada paso.
+SALIDA: sur -> cocina
+SALIDA: este -> dormitorio_visitas
+SALIDA: oeste -> bano
+SALIDA: norte -> dormitorio_matrimonial
+SALIDA: abajo -> sotano requiere llave_sotano
+---
+SALA: bano
+DESC: Un baño frío con azulejos agrietados y una bañera manchada. En el espejo empañado se dibuja la silueta de una mano. Sobre el lavamanos hay una vela antigua.
+SALIDA: este -> pasillo
+OBJETO: vela_antigua
+---
+SALA: dormitorio_visitas
+DESC: Una habitación polvorienta con una cama deshecha y cortinas rasgadas que se mecen sin viento. En la mesa de noche descansa un crucifijo.
+SALIDA: oeste -> pasillo
+OBJETO: crucifijo
+---
+SALA: dormitorio_matrimonial
+DESC: La habitación principal. Un enorme dosel cubre la cama vacía y un reloj de péndulo está detenido a las 3:00 AM. Sobre el tocador brilla la llave del sótano.
+SALIDA: sur -> pasillo
+OBJETO: llave_sotano
+---
+SALA: garaje
+DESC: Un garaje frío lleno de herramientas oxidadas y un auto antiguo cubierto por una lona blanca. El portón que da a la calle está cerrado con un grueso candado.
+SALIDA: oeste -> cocina
+SALIDA: sur -> exterior requiere llave_maestra
+---
+SALA: sotano
+DESC: Una bodega subterránea sumida en una oscuridad absoluta. El aire es helado y se escuchan rasguños detrás de las paredes. En el centro hay un altar con el diario maldito y una llave maestra.
+OSCURA: si
+SALIDA: arriba -> pasillo
+OBJETO: diario_maldito
+OBJETO: llave_maestra
+---
+SALA: exterior
+DESC: El jardín delantero de la mansión. La niebla se disipa bajo la luz de la luna y el aire fresco de la noche te indica que estás a salvo.
+SALIDA: norte -> garaje

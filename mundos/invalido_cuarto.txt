@@ -1,0 +1,14 @@
+# Errores esperados:
+# V1 Línea 14 sin formato CLAVE: valor
+# V1 META mal formada
+
+MUNDO: Ruinas Rotas
+INICIO: vestibulo
+META: ir a torre
+---
+OBJETO: cuerda
+DESC: Una cuerda resistente.
+---
+SALA: torre
+DESC: La cima de la torre.
+Línea suelta para probar formato clave valor

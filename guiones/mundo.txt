@@ -1,0 +1,21 @@
+mirar
+examinar nota_sangrienta
+norte
+oeste
+tomar vela_antigua
+este
+este
+tomar crucifijo
+oeste
+norte
+tomar llave_sotano
+sur
+abajo
+tomar diario_maldito
+tomar llave_maestra
+inventario
+arriba
+sur
+sur
+este
+sur

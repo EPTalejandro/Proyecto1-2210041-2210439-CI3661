@@ -1,0 +1,28 @@
+# Errores esperados: 
+# V2 Identificador duplicado (salon)
+# V4 Salida requiere un objeto inexistente (llave_dorada)
+# V5 Dos salidas en la misma dirección (norte desde salon)
+# V9 Sala inalcanzable (biblioteca)
+
+MUNDO: Laberinto Duplicado
+INICIO: salon
+META: llegar a patio
+---
+OBJETO: antorcha
+DESC: Una antorcha encendida.
+---
+SALA: salon
+DESC: Primera sala llamada salón.
+SALIDA: norte -> biblioteca requiere llave_dorada
+SALIDA: norte -> patio
+---
+SALA: biblioteca
+DESC: Una biblioteca llena de polvo.
+SALIDA: sur -> salon
+---
+SALA: salon
+DESC: Segunda sala con el mismo identificador.
+SALIDA: este -> patio
+---
+SALA: patio
+DESC: Un patio abierto.

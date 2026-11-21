@@ -1,0 +1,30 @@
+# Errores esperados:
+# V6 Sala contiene un objeto no definido (moneda_rota)
+# V7 Objeto colocado en más de una sala (gema_oscura)
+# V10 Objeto necesario no está colocado en ninguna sala (reliquia)
+
+MUNDO: Cripta Inconsistente
+INICIO: capilla
+META: llevar reliquia a altar
+---
+OBJETO: gema_oscura
+DESC: Una piedra negra que absorbe la luz.
+---
+OBJETO: reliquia
+DESC: Un cáliz antiguo necesario para ganar.
+---
+SALA: capilla
+DESC: Una capilla abandonada.
+SALIDA: norte -> cripta
+OBJETO: gema_oscura
+OBJETO: moneda_rota
+---
+SALA: cripta
+DESC: Una cripta húmeda.
+SALIDA: sur -> capilla
+SALIDA: este -> altar
+OBJETO: gema_oscura
+---
+SALA: altar
+DESC: El altar final.
+SALIDA: oeste -> cripta

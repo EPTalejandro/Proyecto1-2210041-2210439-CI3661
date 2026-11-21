@@ -1,0 +1,28 @@
+# Errores esperados:
+# V3 Salida a sala inexistente (entrada -> Abajo -> sotano)
+# V9 Sala inalcanzable (atico)
+# V9 Sala inalcanzable (salida_jardin)
+
+MUNDO: Casa Sin Salida
+INICIO: entrada
+META: llegar a salida_jardin
+---
+OBJETO: llave_vieja
+DESC: Una llave oxidada.
+---
+SALA: entrada
+DESC: El recibidor principal.
+OSCURA: si
+SALIDA: norte -> pasillo
+SALIDA: abajo -> sotano
+---
+SALA: pasillo
+DESC: Un pasillo estrecho.
+SALIDA: sur -> entrada
+---
+SALA: atico
+DESC: Un ático aislado sin conexiones.
+SALIDA: abajo -> pasillo
+---
+SALA: salida_jardin
+DESC: El jardín trasero.
