@@ -9,18 +9,16 @@ Cálculo\
 2210041+2210439=4420480\
 4420480 mod 4 = 0\
 
-cómo compilar, correr y probar.
-
 ## Compilar
 
-'cabal build'\
+*cabal build*
 
 ## Correr y probar
 
 Para correr un mundo (realiza validaciones antes de iniciar)
 
-'cabal run aventura MUNDO'
+*cabal run aventura MUNDO*
 
 Para sólo hacer la validación
 
-'cabal run aventura -- --validar MUNDO
+*cabal run aventura -- --validar MUNDO*
