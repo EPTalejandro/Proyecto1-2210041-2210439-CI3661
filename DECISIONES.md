@@ -97,3 +97,68 @@ Para el comienzo, `estadoInicial` no devuelve un `Estado` directo sino `Either E
 
 **Consecuencias**:\
 Ganamos una regla explícita y fácil de explicar: una sala oscura funciona como una puerta que necesita luz para abrirse, y el jugador recibe un mensaje claro en lugar de quedar dando vueltas sin información. También ganamos que la variante se pueda probar de forma pura: basta con construir un estado, ejecutar `Ir` y comprobar que `salaActual` no cambió, repetir con un objeto `LUZ` en el inventario, y comprobar que `estadoInicial` rechaza un mundo cuyo `INICIO` es oscuro. Perdemos la posibilidad de explorar a ciegas: la sala oscura deja de ser un espacio que se recorre sin ver y pasa a ser un destino bloqueado. Para que la variante importe en el mundo propio, la linterna debe estar disponible antes de la sala oscura y el objeto necesario para ganar debe estar dentro de ella. Queda una consecuencia aceptada: si el jugador suelta la única linterna dentro de una sala oscura, podrá salir pero no volver a recogerla; si se quiere evitar, más adelante se puede impedir soltar el último objeto que ilumina o permitir recogerlo a ciegas. Si el enunciado hubiera pedido exploración a ciegas, habríamos elegido la opción 1, pero habría hecho la variante más difícil de explicar y de probar.
+
+## D5. Representación del estado dinámico y de los objetos soltados
+
+Redactado por: Carlos Bisogno
+
+**Contexto**:\
+`Motor.Nucleo` debía modificar la ubicación del jugador, su inventario y la colocación de los objetos sin realizar entrada o salida. También era necesario guardar y cargar correctamente esos cambios sin alterar las definiciones permanentes de las salas y los objetos. El problema era decidir si `Estado` debía conservar una copia completa del mundo o si debía referenciar el mundo original y guardar solo sus diferencias.
+
+**Opciones**:
+
+    1. Copiar completamente el mundo en cada cambio y reemplazar el mundo entero dentro de `Estado`.
+
+    2. Mantener en `Estado` solo `mundoActual`, `salaActual` e `inventarioActual`, donde `mundoActual` contiene el mundo modificable y se reconstruye al mover objetos.
+
+    3. Mantener el mundo original en `Estado` y una colección separada de objetos soltados y movimientos realizados desde el estado inicial.
+
+**Decisión**:\
+Elegimos la opción 2. `Estado` guarda el mundo actual completo, la sala donde está el jugador y la lista de identificadores del inventario en `src/Motor/Tipos.hs`. No copiamos manualmente el mundo al ejecutar cada comando: la actualización usa registros y funciones de acceso inmutables. En `src/Motor/Nucleo.hs`, `conSala` crea el nuevo mundo ajustando una sola sala mediante `Map.adjust`; `quitarDeSala` elimina un identificador de `objetosSala` al tomarlo y `ponerEnSala` lo agrega a la sala actual al soltarlo. El resultado es que `tomar` quita el objeto de la sala y lo añade al inicio de `inventarioActual`, mientras que `soltar` hace la operación inversa.
+
+**Consecuencias**:\
+Ganamos un estado sencillo y completo: `Estado` contiene todo lo necesario para calcular cualquier operación pura y para serializar una partida. `mundoActual` ya incluye objetos movidos o soltados, por lo que no hace falta mantener un registro paralelo de modificaciones ni reconstruirlos al ejecutar `mirar`, `tomar` o `soltar`. Perdemos algo de eficiencia teórica y de aislamiento entre mundo base y estado dinámico, porque los objetos definidos y la colocación dinámica conviven dentro de `Mundo` en `mundoActual`. Aceptamos esta representación porque Haskell usa estructuras persistentes y es más clara que copiar manualmente todas las salas. Los objetos soltados quedan en `objetosSala` de la sala actual del mundo dinámico y pueden volver a ser tomados; al guardar, `serializarPartida` escribe esa colocación dinámica, no solo el mundo original.
+
+## D6. Reportar todos los errores de validación sin encadenar `Either` con `do`
+
+Redactado por: Carlos Bisogno
+
+**Contexto**:\
+`leerMundo` debe distinguir entre sintaxis inválida (V1) y errores semánticos (V2 a V10), y en ambos casos puede encontrar varios problemas simultáneamente. Una implementación encadenada con `Either` o `do` se detiene ante el primer `Left`, lo cual impide informar a las pruebas y al usuario todos los errores encontrados.
+
+**Opciones**:
+
+    1. Usar una cadena de validaciones con `do` y `Either`; cada fallo corta inmediatamente el resto del análisis.
+
+    2. Acumular cadenas de texto por validación y convertirlas a una sola en `Main`.
+
+    3. Representar cada fase como una lista independiente de `ErrorMundo`, usando `[]` como acumulador de errores y retornando el valor final solo si todas las listas están vacías.
+
+**Decisión**:\
+Elegimos la opción 3. En `src/Motor/Mundo.hs`, `leerMundo` ejecuta primero el preprocesamiento y el reconocimiento sintáctico. Construye `erroresV1` a partir de los errores de formato de líneas, cabecera y bloques, y si no está vacía retorna `Left erroresV1` antes de calcular semántica. Si no hay V1, concatena independientemente las listas producidas por `validarV2`, `validarV3`, `validarV4`, `validarV5`, `validarV6`, `validarV7`, `validarV8`, `validarV9` y `validarV10`. Solo si `erroresSemanticos` está vacío se construye y retorna `Right mundo`.
+
+**Consecuencias**:\
+Ganamos que el motor observe todas las ocurrencias de una misma categoría sin depender del orden de una mónada. Por ejemplo, puede reportar varios identificadores duplicados, varias salidas hacia salas inexistentes y varios objetos repetidos en una sola respuesta. Las comprobaciones son funciones puras sobre listas o conjuntos y pueden mantenerse independientes. Perdemos la capacidad corta de un `Either` encadenado y debemos usar convenciones claras para no perder valores válidos al acumular errores. Por eso las estructuras `Raw*` conservan repeticiones y las funciones semánticas reciben datos planos antes de ensamblar los mapas. Encadenar `Either` con `do` no basta porque su secuencia aborta ante el primer fallo: el constructor `Left` no ofrece una acumulación natural de errores como sí lo permite representar explicitamente una lista de resultados y concatenarla.
+
+## D7. Diseño del reconocedor con `ReadS`
+
+Redactado por: Alejandro Villamizar
+
+**Contexto**:\
+El proyecto exigía reconocedores propios, prohibía librerías de parsing externas y debía procesar mundos, comandos y valores como identificadores, direcciones, metas y booleanos. Era necesario elegir una representación que permitiera composición, alternativa y reconocimiento de toda una entrada sin repetir lógica manual.
+
+**Opciones**:
+
+    1. Usar directamente funciones `ReadS` y escribir el resultado final sin una abstracción combinadora.
+
+    2. Usar expresiones regulares o una biblioteca de reconocimiento externa, aunque el enunciado lo prohíba.
+
+    3. Envolver `ReadS` en `newtype Reconocedor a`, implementando `Functor`, `Applicative`, `Monad` y `Alternative`, y construir reconocedores pequeños que se compongan.
+
+**Decisión**:\
+Elegimos la opción 3. En `src/Motor/Reconocedor.hs`, `Reconocedor a` contiene un `ReadS a`, por lo que cada reconocimiento devuelve una lista de pares `(resultado, resto)`. Las instancias hacen que `Applicative` combine resultados y restos, `Monad` encadene reconocedores sobre cada continuación posible y `Alternative` concatene los resultados de las alternativas. Reconocedores como `pIdentificador`, `pDireccion`, `pSalida`, `pMeta`, `pClaveValor` y `pBooleanoSiNo` se forman a partir de combinadores pequeños como `caracter`, `cadena`, `espacios`, `elegir`, `muchos` y `opcion`.
+
+`reconocerCompleto` exige consumir toda la entrada después de aceptar espacios finales y usa el primer resultado disponible. Si no hay resultados devuelve `Nothing`; así, cuando varias alternativas producen respuestas válidas, el reconocedor conserva todas temporalmente pero la API completa elige una única coincidencia exitosa. Los números de línea no los calcula el reconocedor de texto: `preprocesarLineas` numera las líneas originales antes de limpiar comentarios y espacios, y `dividirBloques` conserva esas tuplas `(Int, String)`. Cada validador usa el número asociado a la línea que está analizando al crear `ErrorSintaxis`, por ejemplo al reconocer una `META`, una `SALIDA` o el inicio de un bloque.
+
+**Consecuencias**:\
+Ganamos reconocimiento modular, reutilizable y sin bibliotecas prohibidas. La ambigüedad queda explícita como una lista de resultados, igual que `ReadS`, y las alternativas como `pLlegar <|> pLlevar` pueden retroceder con seguridad. Conservar la resta de entrada en cada resultado permite exigir consistencia con `eof` en `reconocerCompleto`. Perdemos algo de legibilidad y eficiencia frente a un parser escrito como una función directa: existe una capa de combinadores y pueden aparecer varias continuaciones intermedias. También no obtenemos columnas ni números de línea dentro del reconocedor; se separó esa responsabilidad al preprocesar el archivo. Esa separación evita descripciones de error incorrectas cuando se eliminan comentarios o líneas vacías.

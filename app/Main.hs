@@ -36,8 +36,8 @@ validar :: FilePath -> IO ()
 validar ruta = do
     resultado <- cargarMundo ruta
     case resultado of
-        Left detalle -> fallo (detalle ++ "\nEl mundo NO es válido.")
-        Right m -> putStrLn ("El mundo \"" ++ nombre m ++ "\" es válido.")
+        Left detalle -> fallo detalle
+        Right _ -> putStrLn "Mundo válido."
 
 -- ---------------------------------------------------------------------------
 -- Partida
@@ -140,5 +140,5 @@ mostrarErrorMundo err = show err
 
 fallo :: String -> IO a
 fallo mensaje = do
-    putStrLn mensaje
+    mapM_ (putStrLn . ("Error: " ++)) (lines mensaje)
     exitWith (ExitFailure 1)
